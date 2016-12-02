@@ -85,7 +85,7 @@ int main()
 	for (i = 0; i < SIZE; i++) {
 		for (j = 0; j < SIZE; j++) {
 			const int t1 = i*SIZE + j;
-			for (k = 0; k < SIZE; k += 8) {
+			for (k = 0; k < SIZE; k += 16) {
 				const int t2 = i*SIZE + k;
 				const int t3 = k + j*SIZE;
 				C_[t1] += A_[t2] * B_[t3];
@@ -96,14 +96,14 @@ int main()
 				C_[t1] += A_[t2 + 5] * B_[t3 + 5];
 				C_[t1] += A_[t2 + 6] * B_[t3 + 6];
 				C_[t1] += A_[t2 + 7] * B_[t3 + 7];
-				/*C_[t1] += A_[t2 + 8] * B_[t3 + 8];
+				C_[t1] += A_[t2 + 8] * B_[t3 + 8];
 				C_[t1] += A_[t2 + 9] * B_[t3 + 9];
 				C_[t1] += A_[t2 + 10] * B_[t3 + 10];
 				C_[t1] += A_[t2 + 11] * B_[t3 + 11];
 				C_[t1] += A_[t2 + 12] * B_[t3 + 12];
 				C_[t1] += A_[t2 + 13] * B_[t3 + 13];
 				C_[t1] += A_[t2 + 14] * B_[t3 + 14];
-				C_[t1] += A_[t2 + 15] * B_[t3 + 15];*/
+				C_[t1] += A_[t2 + 15] * B_[t3 + 15];
 			}
 		}
 	}
