@@ -11,7 +11,7 @@
 
 using namespace std;
 
-#define SIZE 512
+#define SIZE 2048
 
 double A_[SIZE*SIZE];
 double B_[SIZE*SIZE];
@@ -26,11 +26,13 @@ int main()
 	double** A = new double*[SIZE];
 	double** B = new double*[SIZE];
 	double** C = new double*[SIZE];
+	
 	int i, j, k;
 	double trash;
 
-	ifstream fin;
-	fin.open("A.txt");
+	ifstream fina;
+
+	fina.open("A_2048.txt");
 
 	for (i = 0; i < SIZE; i++) {
 		A[i] = new double[SIZE];
@@ -38,29 +40,14 @@ int main()
 		C[i] = new double[SIZE];
 	}
 
-	fin >> trash;
-	fin >> trash;
+	fina >> trash;
+	fina >> trash;
+
 	for (i = 0; i < SIZE; i++) {
 		for (j = 0; j < SIZE; j++) {
-			fin >> A[i][j];
+			fina >> A[i][j];
 		}
 	}
-
-	fin.close();
-
-	fin.open("B.txt");
-
-
-	fin >> trash;
-	fin >> trash;
-	for (i = 0; i < SIZE; i++) {
-		for (j = 0; j < SIZE; j++) {
-			fin >> B[i][j];
-		}
-	}
-
-	fin.close();
-
 
 	for (i = 0; i < SIZE; i++) {
 		for (j = 0; j < SIZE; j++) {
@@ -68,43 +55,39 @@ int main()
 		}
 	}
 
-	for (i = 0; i < SIZE; i++) {
-		for (j = 0; j < SIZE; j++) {
-			B_[i + j*SIZE] = B[i][j];
-		}
-	}
+	fina.close();
 
+	ifstream finb;
+	finb.open("B_2048.txt");
 
-
-	ofstream fout;
-	
-	/*for (i = 0; i < SIZE; i++) {
-		for (j = 0; j < SIZE; j++) {
-			cout << A_[i*SIZE + j] << " ";
-		}
-		cout << endl;
-	}
-
-	cout << endl;
+	finb >> trash;
+	finb >> trash;
 
 	for (i = 0; i < SIZE; i++) {
 		for (j = 0; j < SIZE; j++) {
-			cout << B_[i + j * SIZE] << " ";
+			finb >> B[i][j];
 		}
-		cout << endl;
-	}*/
+	}
+
+	for (i = 0; i < SIZE; i++) {
+		for (j = 0; j < SIZE; j++) {
+			B_[i*SIZE + j] = B[j][i];
+		}
+	}
+
+	finb.close();
 
 	chrono::system_clock::time_point StartTime = chrono::system_clock::now();
 	//---------------Matrix Multiplication---------------//
 	omp_set_num_threads(4);
 
-#pragma omp parallel for private(k,j)
+#pragma omp parallel for private(i,j,k)
 	for (i = 0; i < SIZE; i++) {
 		for (j = 0; j < SIZE; j++) {
 			const int t1 = i*SIZE + j;
-			for (k = 0; k < SIZE ; k++) {
-				const int t2 = i*SIZE +  k * 8;
-				const int t3 =  k * 8 + j*SIZE;
+			for (k = 0; k < SIZE; k += 8) {
+				const int t2 = i*SIZE + k;
+				const int t3 = k + j*SIZE;
 				C_[t1] += A_[t2] * B_[t3];
 				C_[t1] += A_[t2 + 1] * B_[t3 + 1];
 				C_[t1] += A_[t2 + 2] * B_[t3 + 2];
@@ -113,6 +96,14 @@ int main()
 				C_[t1] += A_[t2 + 5] * B_[t3 + 5];
 				C_[t1] += A_[t2 + 6] * B_[t3 + 6];
 				C_[t1] += A_[t2 + 7] * B_[t3 + 7];
+				/*C_[t1] += A_[t2 + 8] * B_[t3 + 8];
+				C_[t1] += A_[t2 + 9] * B_[t3 + 9];
+				C_[t1] += A_[t2 + 10] * B_[t3 + 10];
+				C_[t1] += A_[t2 + 11] * B_[t3 + 11];
+				C_[t1] += A_[t2 + 12] * B_[t3 + 12];
+				C_[t1] += A_[t2 + 13] * B_[t3 + 13];
+				C_[t1] += A_[t2 + 14] * B_[t3 + 14];
+				C_[t1] += A_[t2 + 15] * B_[t3 + 15];*/
 			}
 		}
 	}
@@ -123,21 +114,17 @@ int main()
 	chrono::microseconds micro = chrono::duration_cast<chrono::microseconds>(EndTime - StartTime);
 	cout << "Matrix Multiplication done" << endl;
 	cout << "After Manipulation, Time : " << micro.count() << endl;
-
-	fin.open("Cout.txt");
-
-	/*for (i = 0; i < SIZE; i++) {
-		for (j = 0; j < SIZE; j++) {
-			double temp;
-			fin >> temp;
-			cout << C_[i*SIZE + j] << " ";
-		}
-		cout << endl;
-	}*/
-
+	
+	ofstream fout;
+	fout.open("C_2048.txt");
+	for (i = 0; i < SIZE*SIZE; i++) {
+		fout << C_[i] << endl ;
+		//if ((i + 1) % SIZE == 0)
+		//	fout << endl;
+	}
 	while (1) {
+		// not to end the program
 		// 006504207
-		// 821283632
 	}
 
 	return 0;
