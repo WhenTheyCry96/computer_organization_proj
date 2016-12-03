@@ -13,7 +13,7 @@ using namespace std;
 
 #define SIZE 2048
 
-double A_[SIZE*SIZE];
+double A_[SIZE*SIZE];                  // 2D to 1D array
 double B_[SIZE*SIZE];
 double C_[SIZE*SIZE];
 
@@ -23,12 +23,12 @@ int main()
 
 	//-------------------Preprocessing--------------------//
 
-	double** A = new double*[SIZE];
+	double** A = new double*[SIZE];    // double pointer
 	double** B = new double*[SIZE];
 	double** C = new double*[SIZE];
-	
+
 	int i, j, k;
-	double trash;
+	double trash;                      // since the text file starts with matrix size.
 
 	ifstream fina;
 
@@ -40,8 +40,8 @@ int main()
 		C[i] = new double[SIZE];
 	}
 
-	fina >> trash;
-	fina >> trash;
+	fina >> trash;                     // to take 2048 size text as trash data
+	fina >> trash;                     // to take 2048 size text as trash data
 
 	for (i = 0; i < SIZE; i++) {
 		for (j = 0; j < SIZE; j++) {
@@ -51,7 +51,7 @@ int main()
 
 	for (i = 0; i < SIZE; i++) {
 		for (j = 0; j < SIZE; j++) {
-			A_[i*SIZE + j] = A[i][j];
+			A_[i*SIZE + j] = A[i][j];  // 2D array -> 1D array 
 		}
 	}
 
@@ -60,8 +60,8 @@ int main()
 	ifstream finb;
 	finb.open("B_2048.txt");
 
-	finb >> trash;
-	finb >> trash;
+	finb >> trash;                     // to take 2048 size text as trash data
+	finb >> trash;                     // to take 2048 size text as trash data
 
 	for (i = 0; i < SIZE; i++) {
 		for (j = 0; j < SIZE; j++) {
@@ -71,8 +71,8 @@ int main()
 
 	for (i = 0; i < SIZE; i++) {
 		for (j = 0; j < SIZE; j++) {
-			B_[i*SIZE + j] = B[j][i];
-		}
+			B_[i*SIZE + j] = B[j][i];  // 2D array -> 1D array
+		}                              // transpose of B to simply multiply matrix
 	}
 
 	finb.close();
@@ -81,14 +81,14 @@ int main()
 	//---------------Matrix Multiplication---------------//
 	omp_set_num_threads(4);
 
-#pragma omp parallel for private(i,j,k)
+#pragma omp parallel for private(i,j,k)              // multi-threading for variable i,j,k
 	for (i = 0; i < SIZE; i++) {
 		for (j = 0; j < SIZE; j++) {
-			const int t1 = i*SIZE + j;
+			const int t1 = i*SIZE + j;               // not to make an variable t1 everytime to function called
 			for (k = 0; k < SIZE; k += 16) {
-				const int t2 = i*SIZE + k;
-				const int t3 = k + j*SIZE;
-				C_[t1] += A_[t2] * B_[t3];
+				const int t2 = i*SIZE + k;           // not to make an variable t1 everytime to function called
+				const int t3 = k + j*SIZE;           // not to make an variable t1 everytime to function called
+				C_[t1] += A_[t2] * B_[t3];           // loop unrolling for 16 times. 
 				C_[t1] += A_[t2 + 1] * B_[t3 + 1];
 				C_[t1] += A_[t2 + 2] * B_[t3 + 2];
 				C_[t1] += A_[t2 + 3] * B_[t3 + 3];
@@ -115,14 +115,31 @@ int main()
 	cout << "Matrix Multiplication done" << endl;
 	cout << "After Manipulation, Time : " << micro.count() << endl;
 	
-	ofstream fout;
-	fout.open("C_2048.txt");
-	for (i = 0; i < SIZE*SIZE; i++) {
-		fout << C_[i] << endl ;
-		//if ((i + 1) % SIZE == 0)
-		//	fout << endl;
+	for (i = 0; i < SIZE; i++) {
+		for (j = 0; j < SIZE; j++) {
+			C[i][j] = C_[i*SIZE + j];                // 1D result -> 2D result
+		}
 	}
+	/* 
+	~~~not necessary part~~~ 
+	cout << C[0][0] << endl;                         // check if the result is correct
+	cout << C[0][1] << endl;                         // check if the result is correct
+	cout << C[SIZE-1][SIZE-1] << endl;               // check if the result is correct
+	*/
+	ofstream fout;
+	fout.open("C_2048_another.txt");
+
+	for (i = 0; i < SIZE; i++) {
+		for (j = 0; j < SIZE; j++) {
+			fout  << C[i][j] << " " ;                       // 1D result -> 2D result
+		}
+		fout << "\r\n";
+	}
+
+	cout << "END of making C out file" << endl;
+
 	while (1) {
+		// cout << "END of making C out file" << endl;
 		// not to end the program
 		// 006504207
 	}
